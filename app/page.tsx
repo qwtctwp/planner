@@ -156,6 +156,15 @@ export default function Home() {
             >
               Документация
             </Button>
+            <Button 
+              variant="outlined"
+              size="large"
+              component={Link}
+              href="/dashboard"
+              startIcon={<BarChartIcon />}
+            >
+              Панели управления
+            </Button>
           </Stack>
         </Box>
       </Paper>
