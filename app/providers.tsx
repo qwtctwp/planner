@@ -4,7 +4,6 @@ import React, { ReactNode } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ruRU } from '@mui/material/locale';
-import { AuthProvider } from './contexts/AuthContext';
 import { LocaleProvider } from './contexts/LocaleContext';
 
 // Pastel blue color palette
@@ -204,9 +203,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocaleProvider>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
       </LocaleProvider>
     </ThemeProvider>
   );
