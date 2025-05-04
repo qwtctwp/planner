@@ -1,0 +1,1119 @@
+/* Basic FullCalendar Styles */
+.fc {
+  width: 100%;
+  height: 100%;
+  direction: ltr;
+  text-align: left;
+}
+
+/* Sticky time axis */
+.fc-timegrid-axis {
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 3 !important;
+  background-color: #fff !important;
+}
+
+/* Margin for content */
+.fc-col-header {
+  margin-left: 60px !important;
+  width: calc(100% - 60px) !important;
+}
+
+/* Content positioning */
+.fc-timegrid-cols {
+  position: absolute !important;
+  left: 60px !important;
+  width: calc(100% - 60px) !important;
+}
+
+/* Header cell styling */
+.fc-col-header-cell {
+  background-color: #f8fbff;
+  padding: 10px 0;
+}
+
+/* Header cell text */
+.fc-col-header-cell-cushion {
+  font-weight: 500;
+  text-decoration: none !important;
+  color: #3c4043;
+}
+
+/* Time slots with proper height */
+.fc-timegrid-slot {
+  height: 48px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+/* Time slots text alignment */
+.fc-timegrid-slot-label-cushion,
+.fc-timegrid-axis-cushion {
+  text-align: right !important;
+  padding-right: 8px !important;
+  color: #70757a;
+  font-size: 12px;
+}
+
+/* Event styling */
+.fc-timegrid-event {
+  border-radius: 4px !important;
+  margin: 0 2px !important;
+}
+
+.fc-timegrid-event .fc-event-main {
+  padding: 3px 4px !important;
+}
+
+.fc-timegrid-event .fc-event-time {
+  float: left !important;
+  margin-right: 4px !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+.fc-timegrid-event .fc-event-title {
+  clear: both !important;
+  display: block !important;
+  font-size: 13px !important;
+  margin-top: 2px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .fc-timegrid-axis {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+  }
+  
+  .fc-col-header {
+    margin-left: 40px !important;
+    width: calc(100% - 40px) !important;
+  }
+  
+  .fc-timegrid-cols {
+    left: 40px !important;
+    width: calc(100% - 40px) !important;
+  }
+}
+
+/* FullCalendar базовые стили */
+
+/* Основной контейнер */
+.fc {
+  width: 100%;
+  height: 100%;
+  --fc-time-column-width: 70px;
+}
+
+/* Улучшение отображения текста */
+.fc-event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Стиль для событий */
+.fc-event {
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* Прокрутка */
+.fc-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+  background: rgba(165, 199, 228, 0.05);
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background-color: rgba(165, 199, 228, 0.3);
+  border-radius: 4px;
+}
+
+/* Стили для заголовков дней */
+.fc-col-header-cell {
+  background-color: #f8fbff;
+  padding: 8px 0;
+}
+
+.fc-col-header-cell-cushion {
+  font-weight: 600;
+  color: #2A5A84;
+}
+
+/* Индикатор текущего времени */
+.fc-timegrid-now-indicator-line {
+  border-color: #A5C7E4;
+}
+
+/* Dashboard calendar styles */
+.dashboard-calendar .fc-header-toolbar {
+  padding: 8px;
+  margin-bottom: 0;
+  min-height: 40px;
+}
+
+.dashboard-calendar .fc-view-harness {
+  min-height: 400px;
+}
+
+.dashboard-calendar .fc-col-header-cell {
+  padding: 4px 0;
+}
+
+.dashboard-calendar .fc-col-header-cell-cushion {
+  font-size: 0.85rem;
+}
+
+.dashboard-calendar .fc-timegrid-slot-label {
+  font-size: 0.8rem;
+}
+
+.dashboard-calendar .fc-timegrid-axis-cushion {
+  font-size: 0.8rem;
+}
+
+/* Fix event text in dashboard */
+.dashboard-calendar .fc-event-title {
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.dashboard-calendar .fc-event-time {
+  font-size: 0.8rem;
+}
+
+/* FullCalendar Table Layout Fixes */
+.fc-scrollgrid-sync-table {
+  width: 100% !important;
+}
+
+.fc-scrollgrid {
+  width: 100% !important;
+}
+
+.fc-view-harness {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fc-view {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fc-scroller {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fc-col-header, 
+.fc-col-header-cell {
+  width: 100% !important;
+}
+
+/* Time axis styles */
+.fc-timegrid-axis {
+  width: 70px !important;
+}
+
+.fc-timegrid-slots {
+  width: calc(100% - 70px) !important;
+}
+
+.fc-daygrid-body,
+.fc-timegrid-body {
+  width: 100% !important;
+}
+
+.fc-timegrid-col-frame {
+  min-width: 1px !important;
+}
+
+.fc-timegrid-body {
+  position: relative;
+  z-index: 1;
+}
+
+.fc-timegrid-body,
+.fc-timegrid-slots,
+.fc-timegrid-cols {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix scrollbar rendering */
+.fc-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+  background: rgba(165, 199, 228, 0.05);
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background-color: rgba(165, 199, 228, 0.3);
+  border-radius: 4px;
+}
+
+/* Fix excess height issue */
+.fc-timegrid-body {
+  min-height: 100% !important;
+}
+
+/* Fix rendering of calendar internal tables */
+.fc table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+}
+
+.fc-scrollgrid-section-body > td,
+.fc-scrollgrid-section-footer > td {
+  width: 100% !important;
+}
+
+/* Force days to have equal width */
+.fc-timegrid-col {
+  width: 14.285% !important;
+}
+
+/* Fix day labels */
+.fc .fc-col-header-cell-cushion {
+  padding: 8px;
+  text-decoration: none !important;
+} 
+
+/* Prevent event splitting for events longer than 1 hour */
+.fc-timegrid-event {
+  position: absolute !important;
+  z-index: 3 !important;
+  border: 1px solid #3788d8;
+  border-radius: 3px !important;
+  background-color: #3788d8;
+  box-shadow: 0 0 0 1px #fff;
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  white-space: nowrap !important;
+}
+
+/* Fix event display - prevents breaks between hours */
+.fc-timegrid-event-harness {
+  margin: 0 !important;
+  position: absolute !important; 
+}
+
+/* Remove any separator lines in events */
+.fc-timegrid-event.fc-event-mirror,
+.fc-timegrid-event {
+  box-shadow: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+/* Ensure that events touch correctly */
+.fc-timegrid-cols table {
+  border-collapse: collapse !important;
+}
+
+/* Fix rendering of multi-segment events */
+.fc-v-event.fc-event-end,
+.fc-v-event.fc-event-start {
+  border: 1px solid var(--fc-event-border-color, #3788d8) !important;
+}
+
+/* Force hour slots to have clean borders */
+.fc-timegrid-slot-lane {
+  border-bottom: none !important;
+}
+
+/* Fix event segment borders */
+.fc-timegrid-event-harness-inset .fc-timegrid-event {
+  box-shadow: none !important;
+  margin: 0 2px !important;
+}
+
+/* Make sure events don't have spaces between time slots */
+.fc .fc-timegrid-slot {
+  height: 1.5em;
+  border-bottom: 0 !important;
+}
+
+/* Ensure event content is displayed correctly */
+.fc-timegrid-event .fc-event-main {
+  padding: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+/* Header styling */
+.fc-header-toolbar {
+  padding: 16px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Styling time axis */
+.fc-timegrid-axis-cushion {
+  color: #5E7E99 !important;
+  font-weight: 500 !important;
+  text-align: right !important;
+  padding-right: 8px !important;
+}
+
+/* Time display - make it left-aligned like Google Calendar */
+.fc-event-time {
+  white-space: nowrap;
+  text-align: left !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  font-size: 0.85em !important;
+  display: inline-block !important;
+  float: left !important;
+  width: auto !important;
+  font-weight: bold !important;
+}
+
+/* Fix the time grid columns to properly display */
+.fc-timegrid-cols {
+  width: 100% !important;
+}
+
+/* Fix column widths to be equal */
+.fc-col-header-cell,
+.fc-timegrid-col {
+  width: 14.285% !important;  /* 100% / 7 days */
+}
+
+/* Remove any gap between columns */
+.fc-timegrid-col {
+  padding: 0 !important;
+}
+
+/* Ensure all days have the same width, including Sunday */
+.fc-day {
+  width: 14.285% !important; /* 100% / 7 days */
+  max-width: 14.285% !important;
+  min-width: 14.285% !important;
+}
+
+.fc-col-header-cell {
+  width: 14.285% !important;
+  max-width: 14.285% !important;
+  min-width: 14.285% !important;
+}
+
+/* Fix specific styling for Sunday */
+.fc-day-sun, 
+.fc-col-header-cell.fc-day-sun {
+  width: 14.285% !important;
+  max-width: 14.285% !important;
+  min-width: 14.285% !important;
+  border-right: 1px solid var(--fc-border-color, #ddd) !important;
+}
+
+/* Fix for all day grid cells */
+.fc-timegrid-col,
+.fc-daygrid-day {
+  width: 14.285% !important;
+  max-width: 14.285% !important;
+  min-width: 14.285% !important;
+}
+
+/* Ensure table cells have equal width */
+.fc .fc-scrollgrid-section-header table,
+.fc .fc-scrollgrid-section-body table,
+.fc .fc-scrollgrid-section-footer table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+/* Make sure table column widths are preserved */
+.fc table colgroup col {
+  width: 14.285% !important;
+}
+
+/* Ensure grid slots have proper width */
+.fc-timegrid-slots td,
+.fc-timegrid-cols td {
+  width: 14.285% !important;
+}
+
+/* Fix specific issue with last column (Sunday) */
+.fc-timegrid-col.fc-day-sun,
+.fc-daygrid-day.fc-day-sun {
+  display: table-cell !important;
+}
+
+/* Fix for containers */
+.fc-timegrid-body,
+.fc-timegrid-slots,
+.fc-timegrid-cols {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+/* Super-specific fix for Sunday column */
+.fc .fc-day-sun.fc-col-header-cell,
+.fc .fc-day-sun.fc-timegrid-col,
+.fc .fc-day-sun.fc-daygrid-day,
+.fc .fc-timegrid-col:last-child,
+.fc .fc-col-header-cell:last-child,
+.fc .fc-daygrid-day:last-child {
+  border-right: 1px solid var(--fc-border-color, #ddd) !important;
+  width: 14.285% !important;
+  min-width: 14.285% !important;
+  max-width: 14.285% !important;
+  box-sizing: border-box !important;
+  display: table-cell !important;
+}
+
+/* Force the grid to show all days equally */
+.fc-timeGridWeek-view .fc-scrollgrid-sync-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+/* Fix the layout - properly position time grid */
+.fc-timegrid-cols {
+  position: absolute !important;
+  left: 70px !important;
+  right: 0 !important;
+  width: calc(100% - 70px) !important;
+}
+
+.fc-timegrid-col-frame {
+  position: relative !important;
+}
+
+/* Fix time axis width */
+.fc-timegrid-axis-frame {
+  width: 70px !important;
+}
+
+/* Fix column width calculation - adjust for time axis */
+.fc-timegrid-col {
+  width: calc(100% / 7) !important;
+  max-width: none !important;
+}
+
+/* Restore fixed time column on the left */
+.fc .fc-timegrid-axis-cushion {
+  max-width: 60px !important;
+  text-align: right !important;
+  padding-right: 8px !important;
+}
+
+/* Override styles for grid structure to put time labels on the left */
+.fc-timegrid-body {
+  position: relative !important;
+  min-width: 0 !important;
+  display: block !important;
+}
+
+.fc-timegrid-body .fc-timegrid-slots {
+  position: absolute !important;
+  width: 70px !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  z-index: 3 !important;
+  background-color: #f8fbff !important;
+  border-right: 1px solid #ddd !important;
+}
+
+.fc-timegrid-body .fc-timegrid-cols {
+  margin-left: 70px !important;
+  width: calc(100% - 70px) !important;
+}
+
+/* Fix for table width */
+.fc-timegrid-body table {
+  width: 100% !important;
+}
+
+/* Time column styling */
+.fc-timegrid-axis-cushion,
+.fc-timegrid-slot-label-cushion {
+  width: 70px !important;
+  max-width: 70px !important;
+  display: block !important;
+  text-align: right !important;
+  padding-right: 10px !important;
+  box-sizing: border-box !important;
+  color: #5E7E99 !important;
+  font-weight: 500 !important;
+}
+
+/* Adjust time grid slot width and columns */
+.fc-timegrid-slots td {
+  width: 70px !important;
+  max-width: 70px !important;
+  box-sizing: border-box !important;
+}
+
+.fc-timegrid-col {
+  width: calc((100% - 70px) / 7) !important;
+  float: left !important;
+}
+
+/* Стили для временной шкалы */
+.fc-timegrid-slot-label-frame {
+  text-align: right !important;
+}
+
+.fc-timegrid-slot-label-cushion {
+  text-align: right !important;
+  padding-right: 10px !important;
+  color: #5E7E99 !important;
+  font-weight: 500 !important;
+}
+
+.fc-timegrid-axis-cushion {
+  text-align: right !important;
+  padding-right: 10px !important;
+  color: #5E7E99 !important;
+  font-weight: 500 !important;
+}
+
+/* Стили для событий календаря */
+.fc-timegrid-event .fc-event-time {
+  float: left !important;
+  text-align: left !important;
+  font-weight: bold !important;
+  padding-left: 4px !important;
+  width: auto !important;
+  display: inline-block !important;
+}
+
+.fc-timegrid-event .fc-event-title {
+  clear: both !important;
+  display: block !important;
+  text-align: left !important;
+  padding-left: 4px !important;
+}
+
+/* Фикс для колонок - равная ширина дней недели */
+.fc-timegrid-col {
+  width: 14.285% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Убираем пустое пространство слева от понедельника */
+.fc-col-header-cell:first-child {
+  border-left: none !important;
+}
+
+/* Выравнивание колонок времени */
+.fc-timegrid-slots {
+  min-width: 70px !important;
+}
+
+.fc-timegrid-cols {
+  width: calc(100% - 70px) !important;
+  margin-left: 70px !important;
+}
+
+/* Заголовки колонок с днями недели */
+.fc-col-header {
+  width: calc(100% - 70px) !important;
+  margin-left: 70px !important;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .fc-timegrid-axis {
+    width: 50px !important;
+  }
+  
+  .fc-timegrid-cols {
+    width: calc(100% - 50px) !important;
+    margin-left: 50px !important;
+  }
+  
+  .fc-col-header {
+    width: calc(100% - 50px) !important;
+    margin-left: 50px !important;
+  }
+} 
+
+/* FullCalendar переопределение стилей для имитации Google Calendar */
+
+/* Исправление основного макета */
+.fc-direction-ltr .fc-timegrid-slot-label-frame {
+  text-align: right;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border: none;
+}
+
+/* Строка заголовка */
+.fc-col-header-cell {
+  background-color: #f8fbff;
+  border-top: none !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  padding: 10px 0 !important;
+  font-size: 14px;
+}
+
+.fc-col-header-cell-cushion {
+  color: #3c4043;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+/* Формат временной шкалы */
+.fc-timegrid-axis-frame {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: #70757a !important;
+}
+
+.fc-timegrid-slot-label-cushion {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: #70757a !important;
+}
+
+/* Ячейки времени */
+.fc-timegrid-slot {
+  height: 48px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.fc-timegrid-now-indicator-line {
+  border-color: #ea4335 !important;
+  z-index: 5 !important;
+}
+
+.fc-timegrid-now-indicator-arrow {
+  border-color: #ea4335 !important;
+  color: #ea4335 !important;
+}
+
+/* Стиль события */
+.fc-event {
+  border-radius: 4px !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 2px !important;
+}
+
+.fc-event-main {
+  padding: 4px !important;
+}
+
+.fc-event-time {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: inherit !important;
+  opacity: 0.9 !important;
+  margin-bottom: 2px !important;
+  display: block !important;
+}
+
+.fc-event-title {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ИСПРАВЛЕНИЕ ОТОБРАЖЕНИЯ ВРЕМЕНИ СЛЕВА */
+.fc-direction-ltr .fc-timegrid-axis-frame {
+  text-align: right !important;
+  padding-right: 8px !important;
+}
+
+/* Скрыть ось времени в заголовке */
+.fc-col-header .fc-timegrid-axis {
+  display: none !important;
+}
+
+/* Установка фиксированной ширины для оси времени */
+.fc-timegrid-axis {
+  width: 50px !important;
+  max-width: 50px !important;
+  min-width: 50px !important;
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 3 !important;
+  background-color: #fff !important;
+}
+
+.fc-timegrid-axis-frame {
+  min-width: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+.fc-timegrid-axis-cushion {
+  padding-right: 8px !important;
+}
+
+.fc-timegrid-slots {
+  z-index: 1 !important;
+}
+
+/* Важное правило - это сдвигает колонки вправо */
+.fc-timegrid-slots table {
+  margin-left: 50px !important;
+  width: calc(100% - 50px) !important;
+}
+
+.fc-timegrid-cols {
+  position: absolute !important;
+  left: 50px !important;
+  width: calc(100% - 50px) !important;
+}
+
+/* Заголовки дней недели сдвигаем вправо */
+.fc-col-header {
+  margin-left: 50px !important;
+  width: calc(100% - 50px) !important;
+}
+
+/* Фикс для событий - ровное отображение времени */
+.fc-timegrid-event .fc-event-main {
+  padding: 2px 4px !important;
+}
+
+.fc-timegrid-event .fc-event-time {
+  text-align: left !important;
+  float: left !important;
+  clear: none !important;
+  margin-right: 4px !important;
+  font-weight: 500 !important;
+  display: inline !important;
+}
+
+.fc-timegrid-event .fc-event-title {
+  display: block !important;
+  clear: both !important; 
+  margin-top: 2px !important;
+}
+
+/* Устраняем отступы и пробелы */
+.fc .fc-scroller-liquid-absolute {
+  overflow: visible !important;
+}
+
+.fc-theme-standard td, 
+.fc-theme-standard th {
+  border-color: #e0e0e0 !important;
+  border-style: solid !important;
+}
+
+/* Запрет на визуальные разрывы в событиях */
+.fc-timegrid-event {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Dashboard calendar styles */
+.dashboard-calendar .fc-header-toolbar {
+  padding: 8px !important;
+  margin-bottom: 0 !important;
+  min-height: 40px !important;
+}
+
+.dashboard-calendar .fc-view-harness {
+  min-height: 400px !important;
+}
+
+.dashboard-calendar .fc-col-header-cell {
+  padding: 4px 0 !important;
+}
+
+.fc-theme-standard td, 
+.fc-theme-standard th {
+  border-color: #e0e0e0 !important;
+}
+
+/* Time column styles */
+.fc .fc-timegrid-axis {
+  position: absolute !important;
+  width: var(--fc-time-column-width) !important;
+  min-width: var(--fc-time-column-width) !important;
+  max-width: var(--fc-time-column-width) !important;
+  left: 0 !important;
+  z-index: 2 !important;
+  background: white !important;
+}
+
+/* Time slot labels */
+.fc .fc-timegrid-slot-label-frame {
+  text-align: right !important;
+}
+
+.fc .fc-timegrid-slot-label-cushion {
+  text-align: right !important;
+  width: 100% !important;
+  padding-right: 8px !important;
+  color: #70757a !important;
+}
+
+.fc .fc-timegrid-axis-cushion {
+  text-align: right !important;
+  padding-right: 8px !important;
+  font-size: 12px !important;
+  color: #70757a !important;
+}
+
+/* Day columns header positioning */
+.fc .fc-col-header {
+  margin-left: var(--fc-time-column-width) !important;
+  width: calc(100% - var(--fc-time-column-width)) !important;
+}
+
+/* Day column equal widths */
+.fc .fc-col-header-cell,
+.fc .fc-timegrid-col {
+  width: calc(100% / 7) !important;
+  min-width: 0 !important;
+}
+
+/* Content columns positioning */
+.fc .fc-timegrid-cols {
+  left: var(--fc-time-column-width) !important;
+  width: calc(100% - var(--fc-time-column-width)) !important;
+  position: absolute !important;
+}
+
+/* Fix excess height issue */
+.fc .fc-timegrid-body {
+  min-height: 100% !important;
+}
+
+/* Current time indicator */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #ea4335 !important;
+  z-index: 5 !important;
+}
+
+/* Events styling */
+.fc .fc-timegrid-event {
+  border-radius: 4px !important;
+  margin: 0 2px !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-timegrid-event .fc-event-main {
+  padding: 3px 4px !important;
+}
+
+.fc .fc-timegrid-event .fc-event-time {
+  float: left !important;
+  margin-right: 4px !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+.fc .fc-timegrid-event .fc-event-title {
+  clear: both !important;
+  display: block !important;
+  font-size: 13px !important;
+  margin-top: 3px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Cell borders */
+.fc-theme-standard td, 
+.fc-theme-standard th {
+  border-color: #e0e0e0 !important;
+}
+
+/* Header styling */
+.fc .fc-col-header-cell {
+  background-color: #f8fbff !important;
+  border-top: none !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  padding: 10px 0 !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #3c4043 !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+}
+
+/* Scrollbar styling */
+.fc-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* Ensure continuous events (no gaps between hours) */
+.fc .fc-timegrid-slot {
+  height: 48px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.fc .fc-timegrid-event-harness {
+  margin: 0 !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .fc {
+    --fc-time-column-width: 40px;
+  }
+  
+  .fc .fc-timegrid-slot-label-cushion,
+  .fc .fc-timegrid-axis-cushion {
+    font-size: 10px !important;
+  }
+} 
+
+/* FullCalendar Google Calendar Style Override */
+
+/* Base container */
+.fc {
+  width: 100%;
+  height: 100%;
+  --fc-time-column-width: 50px;
+}
+
+/* Essential resets */
+.fc-direction-ltr .fc-timegrid-slot-label-frame {
+  text-align: right;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border: none;
+}
+
+/* Time column - CRITICAL STYLES */
+.fc .fc-timegrid-axis {
+  position: absolute !important;
+  width: var(--fc-time-column-width) !important;
+  min-width: var(--fc-time-column-width) !important;
+  max-width: var(--fc-time-column-width) !important;
+  left: 0 !important;
+  z-index: 2 !important;
+  background: white !important;
+}
+
+/* Force margin for content */
+.fc .fc-timegrid-slots tr {
+  height: 48px !important;
+}
+
+/* Day header positioning */
+.fc .fc-col-header {
+  margin-left: var(--fc-time-column-width) !important;
+  width: calc(100% - var(--fc-time-column-width)) !important;
+}
+
+/* Content columns positioning */
+.fc .fc-timegrid-cols {
+  position: absolute !important;
+  left: var(--fc-time-column-width) !important;
+  width: calc(100% - var(--fc-time-column-width)) !important;
+}
+
+/* Empty cell in header */
+.fc .fc-timegrid-axis-frame,
+.fc .fc-timegrid-axis-cushion {
+  min-width: var(--fc-time-column-width) !important;
+  max-width: var(--fc-time-column-width) !important;
+  width: var(--fc-time-column-width) !important;
+  text-align: right !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Hide the axis in the header to avoid duplicate */
+.fc-col-header .fc-timegrid-axis {
+  visibility: hidden !important;
+  border: none !important;
+}
+
+/* Time slot labels */
+.fc .fc-timegrid-slot-label-cushion {
+  padding-right: 8px !important;
+  text-align: right !important;
+  color: #70757a !important;
+  font-size: 12px !important;
+}
+
+/* Restore width after first column */
+.fc .fc-col-header-cell,
+.fc .fc-timegrid-col {
+  width: calc(100% / 7) !important;
+  min-width: 0 !important;
+}
+
+/* Events styling */
+.fc .fc-timegrid-event {
+  border-radius: 4px !important;
+  margin: 0 2px !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-timegrid-event .fc-event-main {
+  padding: 3px 4px !important;
+}
+
+.fc .fc-timegrid-event .fc-event-time {
+  float: left !important;
+  margin-right: 4px !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+.fc .fc-timegrid-event .fc-event-title {
+  clear: both !important;
+  display: block !important;
+  font-size: 13px !important;
+  margin-top: 3px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Time slot styling */
+.fc .fc-timegrid-slot {
+  height: 48px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .fc {
+    --fc-time-column-width: 40px;
+  }
+  
+  .fc .fc-timegrid-slot-label-cushion,
+  .fc .fc-timegrid-axis-cushion {
+    font-size: 10px !important;
+  }
+} 

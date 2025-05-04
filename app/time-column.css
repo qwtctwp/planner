@@ -1,0 +1,62 @@
+/* Time column fixed styles */
+.fc .fc-timegrid-axis-frame,
+.fc .fc-timegrid-axis {
+  position: sticky !important;
+  left: 0 !important;
+  width: 70px !important;
+  z-index: 3 !important;
+  background: white !important;
+}
+
+.fc .fc-timegrid-slot-label {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 3 !important;
+  background: white !important;
+}
+
+.fc .fc-timegrid-axis-cushion {
+  text-align: right !important;
+  padding-right: 8px !important;
+}
+
+.fc .fc-timegrid-slots td:first-child {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 2 !important;
+  background: white !important;
+}
+
+.fc .fc-timegrid-cols {
+  left: 70px !important;
+  width: calc(100% - 70px) !important;
+  position: relative !important;
+}
+
+.fc .fc-col-header {
+  margin-left: 70px !important;
+  width: calc(100% - 70px) !important;
+}
+
+/* Ensure the div containing the time labels stays in place */
+.fc-timegrid-axis-chunk {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 3 !important; 
+  background: white !important;
+}
+
+/* Fix for time slots */
+.fc-timegrid-slot {
+  height: 40px !important;
+}
+
+/* Add a border to separate time column */
+.fc-timegrid-axis {
+  border-right: 1px solid #ddd !important;
+}
+
+/* Force the time column to be visible */
+.fc-timegrid-gutter {
+  width: 70px !important;
+} 
