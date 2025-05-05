@@ -1,5 +1,15 @@
 import { Pool } from 'pg';
 
+// Проверка, находимся ли мы в процессе сборки на Vercel или в режиме статической генерации
+const isStaticGeneration = process.env.NEXT_PHASE === 'phase-production-build' || 
+                         process.env.NODE_ENV === 'production' && process.env.VERCEL === '1';
+
+// Создаем mock-функцию для запросов при статической сборке
+const mockQuery = async (text: string, params?: any[]) => {
+  console.log('Пропуск запроса БД в процессе сборки:', { text });
+  return { rows: [], rowCount: 0 };
+};
+
 // Конфигурация подключения к PostgreSQL
 const dbConfig = {
   user: process.env.POSTGRES_USER || 'postgres',
@@ -15,26 +25,38 @@ console.log('DB Config:', {
   password: '***' // Скрываем пароль в логах
 });
 
-const pool = new Pool(dbConfig);
+// Создаем пул соединений только если не находимся в режиме статической сборки
+const pool = isStaticGeneration ? null : new Pool(dbConfig);
 
-// Проверка подключения при инициализации
-pool.on('connect', () => {
-  console.log('Установлено соединение с базой данных PostgreSQL');
-});
+// Проверка подключения при инициализации (только если не статическая сборка)
+if (pool) {
+  pool.on('connect', () => {
+    console.log('Установлено соединение с базой данных PostgreSQL');
+  });
 
-pool.on('error', (err) => {
-  console.error('Ошибка в пуле подключений PostgreSQL', err);
-});
+  pool.on('error', (err) => {
+    console.error('Ошибка в пуле подключений PostgreSQL', err);
+  });
+}
 
 // Подключение к базе данных
 export const query = async (text: string, params?: any[]) => {
+  // Пропускаем реальные запросы при статической сборке
+  if (isStaticGeneration) {
+    return mockQuery(text, params);
+  }
+
   try {
     const start = Date.now();
     
     // Проверим текущую базу данных
-    if (text !== 'SELECT current_database()') {
+    if (text !== 'SELECT current_database()' && pool) {
       const dbResult = await pool.query('SELECT current_database()');
       console.log('Текущая база данных:', dbResult.rows[0].current_database);
+    }
+    
+    if (!pool) {
+      throw new Error('Пул соединений с базой данных не инициализирован');
     }
     
     const res = await pool.query(text, params);
