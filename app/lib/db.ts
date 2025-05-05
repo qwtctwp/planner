@@ -17,9 +17,7 @@ const dbConfig = {
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
   database: process.env.POSTGRES_DB || 'studentplanner',
-  ssl: {
-    rejectUnauthorized: false // Это важно для Supabase
-  }
+  ssl: process.env.NODE_ENV === 'production' // Включаем SSL только в production
 };
 
 // Логгирование конфигурации (без пароля)
@@ -70,6 +68,24 @@ export const query = async (text: string, params?: any[]) => {
   } catch (error) {
     console.error('Ошибка при выполнении запроса:', { text, params, error });
     throw error;
+  }
+};
+
+// Функция для проверки подключения к базе данных
+export const testDatabaseConnection = async () => {
+  try {
+    if (!pool) {
+      console.error('Пул соединений не инициализирован для тестирования');
+      return false;
+    }
+    
+    console.log('Тестирование подключения к базе данных...');
+    const result = await pool.query('SELECT NOW()');
+    console.log('Подключение к базе данных успешно! Текущее время сервера:', result.rows[0].now);
+    return true;
+  } catch (error) {
+    console.error('Ошибка при тестировании подключения к базе данных:', error);
+    return false;
   }
 };
 
