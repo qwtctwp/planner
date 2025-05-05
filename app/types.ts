@@ -1,6 +1,6 @@
 export type ViewType = 'day' | 'week' | 'month';
 
-export type AssignmentStatus = 'todo' | 'in_progress' | 'done';
+export type AssignmentStatus = 'todo' | 'in_progress' | 'done' | 'on_hold';
 
 export interface Assignment {
   id: string;
@@ -10,6 +10,7 @@ export interface Assignment {
   description: string;
   dueDate: string; // ISO date string
   completed: boolean;
+  status?: AssignmentStatus; // Статус задания
 }
 
 export interface Category {

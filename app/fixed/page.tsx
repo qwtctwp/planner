@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
-import KanbanBoardFixed from '../KanbanBoardFixed';
+import KanbanBoard from '../components/KanbanBoard';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   getCategoriesForUser, 

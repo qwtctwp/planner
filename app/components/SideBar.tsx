@@ -42,7 +42,7 @@ const SideBar: React.FC<SideBarProps> = ({ open, onClose, children, width = 250 
       text: 'Главная', 
       icon: <DashboardIcon />, 
       path: '/dashboard',
-      active: pathname === '/dashboard' && !searchParams.get('view')
+      active: pathname === '/dashboard' && (!searchParams || !searchParams.get('view'))
     },
     { 
       text: 'Календарь', 

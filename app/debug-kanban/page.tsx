@@ -132,7 +132,8 @@ export default function DebugKanbanPage() {
       const result = await addAssignment(parseInt(userId), {
         ...newAssignment,
         dueDate: new Date().toISOString(),
-        lessonId: undefined
+        lessonId: undefined,
+        completed: newAssignment.status === 'done'
       });
       
       console.log('Assignment created with ID:', result);

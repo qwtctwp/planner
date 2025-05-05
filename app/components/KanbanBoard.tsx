@@ -207,7 +207,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     setNewAssignment({
       title: assignment.title,
       description: assignment.description || '',
-      categoryId: assignment.categoryId,
+      categoryId: assignment.categoryId || '',
       status: assignment.status || (assignment.completed ? 'done' : 'todo')
     });
     setDialogOpen(true);
@@ -242,7 +242,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         categoryId: newAssignment.categoryId,
         status: newAssignment.status,
         dueDate: new Date().toISOString(),
-        lessonId: null
+        lessonId: undefined
       });
     }
     

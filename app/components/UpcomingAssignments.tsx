@@ -66,13 +66,15 @@ const UpcomingAssignments: React.FC<UpcomingAssignmentsProps> = ({
     });
 
   // Ensure we have a color for each category
-  const getCategoryColor = (categoryId: string): string => {
+  const getCategoryColor = (categoryId?: string): string => {
+    if (!categoryId) return '#4285F4';
     const category = categories.find(c => c.id === categoryId);
     return category ? category.color : '#4285F4';
   };
 
   // Get category name
-  const getCategoryName = (categoryId: string): string => {
+  const getCategoryName = (categoryId?: string): string => {
+    if (!categoryId) return 'Без категории';
     const category = categories.find(c => c.id === categoryId);
     return category ? category.name : 'Без категории';
   };

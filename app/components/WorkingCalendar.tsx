@@ -218,13 +218,13 @@ const WorkingCalendar: React.FC<WorkingCalendarProps> = ({
     const start = startOfWeek(firstDay, { weekStartsOn: 1 });
     
     // Create 6 weeks (42 days) to ensure we cover all possibilities
-    const daysArray = [];
+    const daysArray: Date[] = [];
     for (let i = 0; i < 42; i++) {
       daysArray.push(addDays(start, i));
     }
     
     // Split into weeks
-    const weeksArray = [];
+    const weeksArray: Date[][] = [];
     for (let i = 0; i < 6; i++) {
       weeksArray.push(daysArray.slice(i * 7, (i + 1) * 7));
     }

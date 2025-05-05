@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       const userIdForAssignment = parseInt(userId || user.id);
       console.log('ID пользователя для задания:', userIdForAssignment);
       
-      let eventIdNumber = null;
+      let eventIdNumber: number | null = null;
       if (lessonId && lessonId.trim() !== '') {
         eventIdNumber = parseInt(lessonId);
         console.log('Преобразованный ID события (урока):', eventIdNumber);
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       const assignment = await assignmentRepository.createAssignment(
         title,
         description,
-        dueDate ? new Date(dueDate) : undefined,
+        dueDate ? new Date(dueDate) : null,
         eventIdNumber,
         userIdForAssignment,
         status

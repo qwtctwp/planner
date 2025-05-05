@@ -66,6 +66,11 @@ export default function SimpleKanban({
       title: 'В процессе',
       items: []
     },
+    on_hold: {
+      id: 'on_hold',
+      title: 'Отложено',
+      items: []
+    },
     done: {
       id: 'done',
       title: 'Завершено',
@@ -86,12 +91,13 @@ export default function SimpleKanban({
   useEffect(() => {
     const todoItems = assignments.filter(a => a.status === 'todo' || (!a.status && !a.completed));
     const inProgressItems = assignments.filter(a => a.status === 'in_progress');
-    // Combine on_hold and done into the done column
+    const onHoldItems = assignments.filter(a => a.status === 'on_hold');
     const doneItems = assignments.filter(a => a.status === 'done' || (!a.status && a.completed));
 
     setColumns({
       todo: { ...initialColumns.todo, items: todoItems },
       in_progress: { ...initialColumns.in_progress, items: inProgressItems },
+      on_hold: { ...initialColumns.on_hold, items: onHoldItems },
       done: { ...initialColumns.done, items: doneItems }
     });
   }, [assignments]);
