@@ -38,8 +38,16 @@ export async function POST(request: NextRequest) {
     const newUser = await userRepository.createUser(name, email, plainPassword);
     console.log('Пользователь создан:', { id: newUser.id, email: newUser.email });
 
+    // Создаем безопасный объект для JSON-сериализации
+    const safeUserObject = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      created_at: newUser.created_at ? newUser.created_at.toISOString() : null
+    };
+
     // Ответ с данными нового пользователя
-    return NextResponse.json(newUser, { status: 201 });
+    return NextResponse.json(safeUserObject, { status: 201 });
   } catch (error) {
     console.error('Ошибка при регистрации:', error);
     return NextResponse.json(

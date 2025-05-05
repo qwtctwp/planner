@@ -65,10 +65,16 @@ export async function POST(request: NextRequest) {
     
     console.log('Куки установлены');
 
-    // Ответ с данными пользователя (без пароля)
-    const { password: _, ...userWithoutPassword } = user;
-    console.log('Отправка данных пользователя:', userWithoutPassword);
-    return NextResponse.json(userWithoutPassword);
+    // Создаем безопасный объект для JSON-сериализации
+    const safeUserObject = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      created_at: user.created_at ? user.created_at.toISOString() : null
+    };
+    
+    console.log('Отправка данных пользователя:', safeUserObject);
+    return NextResponse.json(safeUserObject);
   } catch (error) {
     console.error('Ошибка при аутентификации:', error);
     return NextResponse.json(
