@@ -16,12 +16,19 @@ const dbConfig = {
   password: process.env.POSTGRES_PASSWORD || '',
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
-  database: process.env.POSTGRES_DB || 'studentplanner'
+  database: process.env.POSTGRES_DB || 'studentplanner',
+  ssl: {
+    rejectUnauthorized: false // Это важно для Supabase
+  }
 };
 
 // Логгирование конфигурации (без пароля)
 console.log('DB Config:', { 
-  ...dbConfig, 
+  user: dbConfig.user,
+  host: dbConfig.host,
+  port: dbConfig.port,
+  database: dbConfig.database,
+  ssl: dbConfig.ssl,
   password: '***' // Скрываем пароль в логах
 });
 
@@ -49,22 +56,19 @@ export const query = async (text: string, params?: any[]) => {
   try {
     const start = Date.now();
     
-    // Проверим текущую базу данных
-    if (text !== 'SELECT current_database()' && pool) {
-      const dbResult = await pool.query('SELECT current_database()');
-      console.log('Текущая база данных:', dbResult.rows[0].current_database);
-    }
-    
     if (!pool) {
+      console.error('Пул соединений с базой данных не инициализирован');
       throw new Error('Пул соединений с базой данных не инициализирован');
     }
     
+    console.log('Выполнение запроса:', { text, params });
+    
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('executed query', { text, duration, rows: res.rowCount });
+    console.log('Запрос выполнен:', { text, duration, rows: res.rowCount });
     return res;
   } catch (error) {
-    console.error('Ошибка при выполнении запроса:', error);
+    console.error('Ошибка при выполнении запроса:', { text, params, error });
     throw error;
   }
 };
@@ -170,11 +174,18 @@ export const initDatabase = async () => {
 export const userRepository = {
   // Создать пользователя
   createUser: async (name: string, email: string, hashedPassword: string) => {
-    const result = await query(
-      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at', 
-      [name, email, hashedPassword]
-    );
-    return result.rows[0];
+    console.log('Создание пользователя:', { name, email });
+    try {
+      const result = await query(
+        'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *', 
+        [name, email, hashedPassword]
+      );
+      console.log('Пользователь успешно создан:', result.rows[0]);
+      return result.rows[0];
+    } catch (error) {
+      console.error('Ошибка при создании пользователя:', error);
+      throw error;
+    }
   },
 
   // Получить пользователя по email
