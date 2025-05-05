@@ -22,7 +22,10 @@ import {
 import {
   Menu as MenuIcon,
   Add as AddIcon,
-  ExitToApp
+  ExitToApp,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import Calendar from '../components/Calendar';
 import LessonDialog from '../components/LessonDialog';
@@ -32,11 +35,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { ViewType, Lesson, Category, Assignment } from '../types';
 import {
   getCategoriesForUser,
-  getLessonsForUser,
+  getEventsForUser,
   getAssignmentsForUser,
-  addLesson,
-  updateLesson,
-  deleteLesson,
+  addEvent,
+  updateEvent,
+  deleteEvent,
   addAssignment,
 } from '../lib/api';
 import SimpleCalendar from '../components/SimpleCalendar';
@@ -83,6 +86,13 @@ export default function CalendarPage() {
     mouseY: number;
     lesson: Lesson | null;
   } | null>(null);
+  
+  // Новое состояние для модального меню действий с событием
+  const [eventActionMenu, setEventActionMenu] = useState<{
+    mouseX: number;
+    mouseY: number;
+    lesson: Lesson | null;
+  } | null>(null);
 
   // Log state for debugging
   useEffect(() => {
@@ -104,7 +114,7 @@ export default function CalendarPage() {
           const userCategories = await getCategoriesForUser(user.id);
           console.log('Categories loaded:', userCategories);
           
-          const userLessons = await getLessonsForUser(user.id);
+          const userLessons = await getEventsForUser(user.id);
           console.log('Lessons loaded:', userLessons);
           console.log('Lessons data structure check:', userLessons.length > 0 ? 
             {firstLesson: userLessons[0], startType: typeof userLessons[0]?.start, endType: typeof userLessons[0]?.end} : 'No lessons');
@@ -138,13 +148,50 @@ export default function CalendarPage() {
     }
   }, [isClient, view, lessons]);
 
-  const handleEventClick = (lesson: Lesson) => {
-    setSelectedLesson(lesson);
-    setAssignmentDialogOpen(true);
+  // Handle event click - отображение меню выбора действий вместо сразу открытия диалога задания
+  const handleEventClick = (lesson: Lesson, mouseX: number, mouseY: number) => {
+    // Открываем меню выбора действий вместо сразу диалога
+    setEventActionMenu({
+      mouseX,
+      mouseY,
+      lesson
+    });
+  };
+  
+  // Закрытие меню выбора действий
+  const handleCloseEventActionMenu = () => {
+    setEventActionMenu(null);
+  };
+  
+  // Обработка выбора "Добавить задание"
+  const handleAddAssignmentOption = () => {
+    if (eventActionMenu?.lesson && eventActionMenu.lesson.id) {
+      setSelectedLesson(eventActionMenu.lesson);
+      setAssignmentDialogOpen(true);
+    }
+    handleCloseEventActionMenu();
+  };
+  
+  // Обработка выбора "Редактировать событие"
+  const handleEditEventOption = () => {
+    if (eventActionMenu?.lesson) {
+      setSelectedLesson(eventActionMenu.lesson);
+      setLessonDialogOpen(true);
+    }
+    handleCloseEventActionMenu();
+  };
+  
+  // Обработка выбора "Удалить событие"
+  const handleDeleteEventOption = () => {
+    if (eventActionMenu?.lesson) {
+      handleDeleteLesson(eventActionMenu.lesson);
+    }
+    handleCloseEventActionMenu();
   };
 
   const handleDateSelect = (start: Date, end: Date) => {
     setSelectedDate({ start, end });
+    setSelectedLesson(null);
     setLessonDialogOpen(true);
   };
 
@@ -157,35 +204,47 @@ export default function CalendarPage() {
         assignments: []
       };
       
-      const lessonId = await addLesson(user.id, newLessonData);
+      const lessonId = await addEvent(user.id, newLessonData);
       const newLesson: Lesson = {
         ...newLessonData,
         id: lessonId
       };
       
       setLessons([...lessons, newLesson]);
+      setSelectedLesson(null);
+      setSelectedDate(null);
     } catch (error) {
       console.error('Ошибка при добавлении урока:', error);
     }
   };
   
-  const handleUpdateLesson = async (lessonId: string, lessonData: Omit<Lesson, 'id' | 'assignments'>) => {
+  const handleUpdateLesson = async (lessonId: string, lessonData: Omit<Lesson, 'id' | 'assignments'> | Partial<Lesson>) => {
     if (!user) return;
     
     try {
-      await updateLesson(lessonId, lessonData);
+      console.log('Обновление урока:', lessonId, lessonData);
       
       // Find the existing lesson to preserve its assignments
       const existingLesson = lessons.find(l => l.id === lessonId);
+      if (!existingLesson) {
+        console.error('Урок для обновления не найден:', lessonId);
+        return;
+      }
       
+      // Отправляем данные на сервер через API
+      await updateEvent(lessonId, lessonData);
+      
+      // После успешного обновления на сервере обновляем локальное состояние
+      // Создаем новый объект с обновленными данными, сохраняя существующие assignments
       const updatedLesson: Lesson = {
+        ...existingLesson,
         ...lessonData,
-        id: lessonId,
-        assignments: existingLesson?.assignments || []
+        id: lessonId
       };
       
       setLessons(lessons.map(l => l.id === lessonId ? updatedLesson : l));
       setLessonDialogOpen(false);
+      setSelectedLesson(null);
     } catch (error) {
       console.error('Ошибка при обновлении урока:', error);
     }
@@ -195,7 +254,7 @@ export default function CalendarPage() {
     if (!user) return;
     
     try {
-      await deleteLesson(lesson.id);
+      await deleteEvent(lesson.id);
       setLessons(lessons.filter(l => l.id !== lesson.id));
     } catch (error) {
       console.error('Ошибка при удалении урока:', error);
@@ -228,7 +287,7 @@ export default function CalendarPage() {
             assignments: [...lesson.assignments, assignmentId]
           };
           
-          await updateLesson(lesson.id, updatedLesson);
+          await updateEvent(lesson.id, updatedLesson);
           setLessons(lessons.map(l =>
             l.id === assignmentData.lessonId ? updatedLesson : l
           ));
@@ -283,7 +342,7 @@ export default function CalendarPage() {
           console.error('Ошибка при преобразовании дат для урока:', lesson.id, dateError);
           return null;
         }
-      }).filter(Boolean); // Удаляем null значения
+      }).filter(Boolean) as any[]; // Исправлено для типизации
       
       console.log('События календаря после преобразования:', events.length);
       return events;
@@ -416,44 +475,6 @@ export default function CalendarPage() {
             marginTop: '64px', // Height of the AppBar
           }}
         >
-          {/* Calendar controls */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, mt: 2 }}>
-            <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.6)', fontStyle: 'italic' }}>
-              Подсказка: ПКМ по событию для редактирования или удаления. ЛКМ для привязки заданий.
-            </Typography>
-            <ToggleButtonGroup
-              value={view}
-              exclusive
-              onChange={(event, newValue) => {
-                if (newValue !== null) {
-                  setView(newValue);
-                }
-              }}
-              aria-label="calendar view"
-              sx={{ 
-                '& .MuiToggleButton-root': { 
-                  border: '1px solid rgba(165, 199, 228, 0.2)',
-                  borderRadius: '8px !important',
-                  mx: 0.5,
-                  color: '#5E7E99',
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  '&.Mui-selected': {
-                    backgroundColor: '#A5C7E4',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: '#84A7C4',
-                    }
-                  }
-                }
-              }}
-            >
-              <ToggleButton value="day">День</ToggleButton>
-              <ToggleButton value="week">Неделя</ToggleButton>
-              <ToggleButton value="month">Месяц</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-
           {/* Calendar */}
           <Paper 
             sx={{ 
@@ -488,7 +509,8 @@ export default function CalendarPage() {
                         lesson: lesson
                       });
                     } else {
-                      handleEventClick(lesson);
+                      // Вместо сразу диалога, показываем меню с выбором действий
+                      handleEventClick(lesson, jsEvent.clientX, jsEvent.clientY);
                     }
                   }
                 }}
@@ -508,7 +530,7 @@ export default function CalendarPage() {
             )}
           </Paper>
 
-          {/* Context Menu */}
+          {/* Контекстное меню (при правом клике) */}
           <Menu
             open={contextMenu !== null}
             onClose={handleCloseContextMenu}
@@ -541,11 +563,75 @@ export default function CalendarPage() {
               <Typography variant="body2" sx={{ color: 'error.main' }}>Удалить</Typography>
             </MenuItem>
           </Menu>
+          
+          {/* Новое меню выбора действий (при обычном клике) */}
+          <Menu
+            open={eventActionMenu !== null}
+            onClose={handleCloseEventActionMenu}
+            anchorReference="anchorPosition"
+            anchorPosition={
+              eventActionMenu !== null
+                ? { top: eventActionMenu.mouseY, left: eventActionMenu.mouseX }
+                : undefined
+            }
+            PaperProps={{
+              sx: { 
+                borderRadius: 2,
+                boxShadow: '0 4px 20px rgba(165, 199, 228, 0.15)',
+                width: 240
+              }
+            }}
+          >
+            <MenuItem
+              onClick={handleAddAssignmentOption}
+              sx={{ 
+                py: 1.5, 
+                '&:hover': { 
+                  backgroundColor: 'rgba(165, 199, 228, 0.1)' 
+                },
+                gap: 1.5 
+              }}
+            >
+              <AssignmentIcon fontSize="small" sx={{ color: '#84A7C4' }} />
+              <Typography variant="body2">Добавить домашнее задание</Typography>
+            </MenuItem>
+            <Divider sx={{ borderColor: 'rgba(165, 199, 228, 0.15)' }} />
+            <MenuItem
+              onClick={handleEditEventOption}
+              sx={{ 
+                py: 1.5,
+                '&:hover': { 
+                  backgroundColor: 'rgba(165, 199, 228, 0.1)' 
+                },
+                gap: 1.5
+              }}
+            >
+              <EditIcon fontSize="small" sx={{ color: '#84A7C4' }} />
+              <Typography variant="body2">Редактировать событие</Typography>
+            </MenuItem>
+            <MenuItem
+              onClick={handleDeleteEventOption}
+              sx={{ 
+                py: 1.5,
+                '&:hover': { 
+                  backgroundColor: 'rgba(255, 200, 200, 0.1)' 
+                },
+                gap: 1.5
+              }}
+            >
+              <DeleteIcon fontSize="small" sx={{ color: '#e57373' }} />
+              <Typography variant="body2" sx={{ color: 'error.main' }}>Удалить событие</Typography>
+            </MenuItem>
+          </Menu>
 
           {/* Dialogs */}
           <LessonDialog
             open={lessonDialogOpen}
-            onClose={() => setLessonDialogOpen(false)}
+            onClose={() => {
+              setLessonDialogOpen(false);
+              setSelectedLesson(null);
+              setSelectedDate(null);
+            }}
             onSave={(lessonData, existingLessonId) => {
               if (existingLessonId) {
                 handleUpdateLesson(existingLessonId, lessonData);
@@ -560,10 +646,14 @@ export default function CalendarPage() {
           
           <AssignmentDialog
             open={assignmentDialogOpen}
-            onClose={() => setAssignmentDialogOpen(false)}
+            onClose={() => {
+              setAssignmentDialogOpen(false);
+              setSelectedLesson(null);
+            }}
             onSave={handleAddAssignment}
             categories={categories}
             lessons={lessons}
+            initialLesson={selectedLesson}
           />
           
           {/* Floating Action Button */}

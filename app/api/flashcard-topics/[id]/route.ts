@@ -8,79 +8,23 @@ const formatTopic = (topic: any) => {
   return {
     ...topic,
     id: topic.id.toString(),
-    categoryId: topic.category_id ? topic.category_id.toString() : null,
+    categoryId: topic.category_id ? topic.category_id.toString() : '',
+    cardsCount: topic.cards_count || 0,
     createdAt: topic.created_at ? topic.created_at.toISOString() : new Date().toISOString(),
-    cardsCount: topic.cards_count || 0
+    color: topic.color || '#84A7C4' // Дефолтный цвет
   };
 };
 
-// Обновление темы
-export async function PUT(
+// Получение темы по ID
+export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      console.log('PUT /api/flashcard-topics/[id] - id:', params.id);
-      
       const topicId = parseInt(params.id);
       
-      // Получаем тело запроса в сыром виде
-      const rawBody = await req.text();
-      console.log('Raw request body:', rawBody);
-
-      // Преобразуем тело запроса в JSON
-      const body = JSON.parse(rawBody);
-      console.log('Тело запроса:', body);
-      
-      // Получаем параметры из тела запроса
-      const { title, description, categoryId, color } = body;
-      
-      // Получаем существующую тему для проверки
-      const existingTopic = await flashcardTopicRepository.getTopicById(topicId);
-      if (!existingTopic) {
-        return NextResponse.json(
-          { error: 'Тема не найдена' },
-          { status: 404 }
-        );
-      }
-      
-      // Проверяем, что пользователь имеет право на обновление темы
-      if (existingTopic.user_id.toString() !== user.id.toString()) {
-        return NextResponse.json(
-          { error: 'У вас нет прав на обновление этой темы' },
-          { status: 403 }
-        );
-      }
-      
-      // Подготавливаем данные для обновления
-      const titleToUse = title || existingTopic.title;
-      const descriptionToUse = description !== undefined ? description : existingTopic.description;
-      
-      // Преобразуем categoryId в number или null
-      let categoryIdNumber = existingTopic.category_id;
-      if (categoryId !== undefined) {
-        categoryIdNumber = categoryId && categoryId.trim() !== '' ? parseInt(categoryId) : null;
-      }
-      
-      const colorToUse = color !== undefined ? color : existingTopic.color;
-      
-      // Ensure there's a title
-      if (!titleToUse) {
-        return NextResponse.json(
-          { error: 'Необходимо указать название темы' },
-          { status: 400 }
-        );
-      }
-      
-      // Обновление темы
-      const topic = await flashcardTopicRepository.updateTopic(
-        topicId,
-        titleToUse,
-        categoryIdNumber,
-        descriptionToUse,
-        colorToUse
-      );
+      const topic = await flashcardTopicRepository.getTopicById(topicId);
       
       if (!topic) {
         return NextResponse.json(
@@ -89,16 +33,62 @@ export async function PUT(
         );
       }
       
-      console.log('Обновлена тема:', topic);
-      
-      // Преобразуем ID в строку для клиентского кода
+      // Форматируем тему для клиентского кода
       const formattedTopic = formatTopic(topic);
       
-      // Создаем ответ с правильной кодировкой
-      const response = NextResponse.json(formattedTopic);
-      response.headers.set('Content-Type', 'application/json; charset=utf-8');
+      return NextResponse.json(formattedTopic);
+    } catch (error) {
+      console.error('Ошибка при получении темы:', error);
+      return NextResponse.json(
+        { error: 'Внутренняя ошибка сервера' },
+        { status: 500 }
+      );
+    }
+  });
+}
+
+// Обновление темы
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  return withAuth(request, async (req: NextRequest, user: any) => {
+    try {
+      const topicId = parseInt(params.id);
+      const body = await req.json();
+      const { title, description, categoryId, color } = body;
       
-      return response;
+      // Проверяем, существует ли тема
+      const existingTopic = await flashcardTopicRepository.getTopicById(topicId);
+      
+      if (!existingTopic) {
+        return NextResponse.json(
+          { error: 'Тема не найдена' },
+          { status: 404 }
+        );
+      }
+      
+      // Валидация названия
+      if (!title) {
+        return NextResponse.json(
+          { error: 'Необходимо указать название темы' },
+          { status: 400 }
+        );
+      }
+      
+      // Обновляем тему
+      const updatedTopic = await flashcardTopicRepository.updateTopic(
+        topicId,
+        title,
+        categoryId ? parseInt(categoryId) : null,
+        description,
+        color
+      );
+      
+      // Форматируем тему для клиентского кода
+      const formattedTopic = formatTopic(updatedTopic);
+      
+      return NextResponse.json(formattedTopic);
     } catch (error) {
       console.error('Ошибка при обновлении темы:', error);
       return NextResponse.json(
@@ -116,12 +106,11 @@ export async function DELETE(
 ) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      console.log('DELETE /api/flashcard-topics/[id] - id:', params.id);
-      
       const topicId = parseInt(params.id);
       
-      // Получаем существующую тему для проверки
+      // Проверяем, существует ли тема
       const existingTopic = await flashcardTopicRepository.getTopicById(topicId);
+      
       if (!existingTopic) {
         return NextResponse.json(
           { error: 'Тема не найдена' },
@@ -129,18 +118,8 @@ export async function DELETE(
         );
       }
       
-      // Проверяем, что пользователь имеет право на удаление темы
-      if (existingTopic.user_id.toString() !== user.id.toString()) {
-        return NextResponse.json(
-          { error: 'У вас нет прав на удаление этой темы' },
-          { status: 403 }
-        );
-      }
-      
-      // Удаление темы (каскадно удалит все карточки этой темы)
+      // Удаляем тему
       await flashcardTopicRepository.deleteTopic(topicId);
-      
-      console.log('Тема удалена успешно');
       
       return NextResponse.json({ success: true });
     } catch (error) {

@@ -428,7 +428,16 @@ export const flashcardRepository = {
     );
     return result.rows[0];
   },
-  
+
+  // Пометить карточку как избранную
+  toggleFavorite: async (id: number, favorite: boolean) => {
+    const result = await query(
+      'UPDATE flashcards SET favorite = $1 WHERE id = $2 RETURNING *',
+      [favorite, id]
+    );
+    return result.rows[0];
+  },
+
   // Удалить карточку
   deleteCard: async (id: number) => {
     await query('DELETE FROM flashcards WHERE id = $1', [id]);

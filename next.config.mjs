@@ -2,13 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'export',
-  basePath: '/diploma',
-  assetPrefix: '/diploma/',
+  // output: 'export', // Закомментировано для решения проблемы с middleware
+  // basePath: '/diploma', // Закомментировано для доступа по адресу http://localhost:3000
   images: {
     unoptimized: true,
   },
-  trailingSlash: true,
 };
 
 export default nextConfig; 

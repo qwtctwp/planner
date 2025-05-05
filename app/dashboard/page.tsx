@@ -30,7 +30,9 @@ import {
   ExitToApp,
   Book as BookIcon,
   CalendarMonth as CalendarIcon,
-  Dashboard as DashboardIcon
+  Dashboard as DashboardIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import Calendar from '../components/Calendar';
 import SimpleCalendar from '../components/SimpleCalendar';
@@ -96,6 +98,13 @@ export default function Dashboard() {
   
   // Состояние для меню пользователя
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  // Новое состояние для модального меню действий с событием
+  const [eventActionMenu, setEventActionMenu] = useState<{
+    mouseX: number;
+    mouseY: number;
+    lesson: Lesson | null;
+  } | null>(null);
 
   // Безопасная проверка, находимся ли мы на клиенте
   useEffect(() => {
@@ -277,6 +286,8 @@ export default function Dashboard() {
       };
       
       setLessons([...lessons, newLesson]);
+      setSelectedLesson(null);
+      setSelectedDate(null);
     } catch (error) {
       console.error('Ошибка при добавлении урока:', error);
     }
@@ -301,6 +312,7 @@ export default function Dashboard() {
       
       setLessons(lessons.map(l => l.id === lessonId ? updatedLesson : l));
       setLessonDialogOpen(false);
+      setSelectedLesson(null);
     } catch (error) {
       console.error('Ошибка при обновлении урока:', error);
     }
@@ -364,14 +376,50 @@ export default function Dashboard() {
     }
   };
 
-  const handleEventClick = (lesson: Lesson, event?: React.MouseEvent) => {
-    // Regular click now always opens assignments dialog
-    setSelectedLesson(lesson);
-    setAssignmentDialogOpen(true);
+  // Handle event click - отображение меню выбора действий вместо сразу открытия диалога задания
+  const handleEventClick = (lesson: Lesson, mouseX: number, mouseY: number) => {
+    // Открываем меню выбора действий вместо сразу диалога
+    setEventActionMenu({
+      mouseX,
+      mouseY,
+      lesson
+    });
+  };
+  
+  // Закрытие меню выбора действий
+  const handleCloseEventActionMenu = () => {
+    setEventActionMenu(null);
+  };
+  
+  // Обработка выбора "Добавить задание"
+  const handleAddAssignmentOption = () => {
+    if (eventActionMenu?.lesson && eventActionMenu.lesson.id) {
+      setSelectedLesson(eventActionMenu.lesson);
+      setAssignmentDialogOpen(true);
+    }
+    handleCloseEventActionMenu();
+  };
+  
+  // Обработка выбора "Редактировать событие"
+  const handleEditEventOption = () => {
+    if (eventActionMenu?.lesson) {
+      setSelectedLesson(eventActionMenu.lesson);
+      setLessonDialogOpen(true);
+    }
+    handleCloseEventActionMenu();
+  };
+  
+  // Обработка выбора "Удалить событие"
+  const handleDeleteEventOption = () => {
+    if (eventActionMenu?.lesson) {
+      handleDeleteLesson(eventActionMenu.lesson);
+    }
+    handleCloseEventActionMenu();
   };
 
   const handleDateSelect = (start: Date, end: Date) => {
     setSelectedDate({ start, end });
+    setSelectedLesson(null);
     setLessonDialogOpen(true);
   };
 
@@ -650,7 +698,13 @@ export default function Dashboard() {
                     onEventClick={(eventId, jsEvent) => {
                       const lesson = lessons.find(l => l.id === eventId);
                       if (lesson) {
-                        handleEventClick(lesson, jsEvent);
+                        if (jsEvent.type === 'contextmenu') {
+                          jsEvent.preventDefault();
+                          // Для правого клика открываем то же меню
+                          handleEventClick(lesson, jsEvent.clientX, jsEvent.clientY);
+                        } else {
+                          handleEventClick(lesson, jsEvent.clientX, jsEvent.clientY);
+                        }
                       }
                     }}
                     onSelectSlot={(start, end) => handleDateSelect(start, end)}
@@ -734,7 +788,13 @@ export default function Dashboard() {
                         onEventClick={(eventId, jsEvent) => {
                           const lesson = lessons.find(l => l.id === eventId);
                           if (lesson) {
-                            handleEventClick(lesson, jsEvent);
+                            if (jsEvent.type === 'contextmenu') {
+                              jsEvent.preventDefault();
+                              // Для правого клика открываем то же меню
+                              handleEventClick(lesson, jsEvent.clientX, jsEvent.clientY);
+                            } else {
+                              handleEventClick(lesson, jsEvent.clientX, jsEvent.clientY);
+                            }
                           }
                         }}
                         onSelectSlot={(start, end) => handleDateSelect(start, end)}
@@ -975,7 +1035,11 @@ export default function Dashboard() {
           {/* Dialogs */}
           <LessonDialog
             open={lessonDialogOpen}
-            onClose={() => setLessonDialogOpen(false)}
+            onClose={() => {
+              setLessonDialogOpen(false);
+              setSelectedLesson(null);
+              setSelectedDate(null);
+            }}
             onSave={(lessonData, existingLessonId) => {
               if (existingLessonId) {
                 handleUpdateLesson(existingLessonId, lessonData);
@@ -995,6 +1059,66 @@ export default function Dashboard() {
             categories={categories}
             lessons={lessons}
           />
+          
+          {/* Меню выбора действий с событием */}
+          <Menu
+            open={eventActionMenu !== null}
+            onClose={handleCloseEventActionMenu}
+            anchorReference="anchorPosition"
+            anchorPosition={
+              eventActionMenu !== null
+                ? { top: eventActionMenu.mouseY, left: eventActionMenu.mouseX }
+                : undefined
+            }
+            PaperProps={{
+              sx: { 
+                borderRadius: 2,
+                boxShadow: '0 4px 20px rgba(165, 199, 228, 0.15)',
+                width: 240
+              }
+            }}
+          >
+            <MenuItem
+              onClick={handleAddAssignmentOption}
+              sx={{ 
+                py: 1.5, 
+                '&:hover': { 
+                  backgroundColor: 'rgba(165, 199, 228, 0.1)' 
+                },
+                gap: 1.5 
+              }}
+            >
+              <AssignmentIcon fontSize="small" sx={{ color: '#84A7C4' }} />
+              <Typography variant="body2">Добавить домашнее задание</Typography>
+            </MenuItem>
+            <Divider sx={{ borderColor: 'rgba(165, 199, 228, 0.15)' }} />
+            <MenuItem
+              onClick={handleEditEventOption}
+              sx={{ 
+                py: 1.5,
+                '&:hover': { 
+                  backgroundColor: 'rgba(165, 199, 228, 0.1)' 
+                },
+                gap: 1.5
+              }}
+            >
+              <EditIcon fontSize="small" sx={{ color: '#84A7C4' }} />
+              <Typography variant="body2">Редактировать событие</Typography>
+            </MenuItem>
+            <MenuItem
+              onClick={handleDeleteEventOption}
+              sx={{ 
+                py: 1.5,
+                '&:hover': { 
+                  backgroundColor: 'rgba(255, 200, 200, 0.1)' 
+                },
+                gap: 1.5
+              }}
+            >
+              <DeleteIcon fontSize="small" sx={{ color: '#e57373' }} />
+              <Typography variant="body2" sx={{ color: 'error.main' }}>Удалить событие</Typography>
+            </MenuItem>
+          </Menu>
         </Box>
       ) : null}
     </Box>

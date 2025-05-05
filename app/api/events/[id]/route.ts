@@ -1,47 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '../../../lib/auth';
-import { lessonRepository, eventRepository } from '../../../lib/db';
+import { eventRepository } from '../../../lib/db';
 
 // Преобразование числовых ID в строки для клиентского кода
-const formatLesson = (lesson: any) => {
-  if (!lesson) return null;
+const formatEvent = (event: any) => {
+  if (!event) return null;
   
   // Преобразуем начало и конец в ISO-строки, если это объекты Date
-  const start = lesson.start_time ? (
-    typeof lesson.start_time === 'object' ? lesson.start_time.toISOString() : lesson.start_time
+  const start = event.start_time ? (
+    typeof event.start_time === 'object' ? event.start_time.toISOString() : event.start_time
   ) : null;
   
-  const end = lesson.end_time ? (
-    typeof lesson.end_time === 'object' ? lesson.end_time.toISOString() : lesson.end_time
+  const end = event.end_time ? (
+    typeof event.end_time === 'object' ? event.end_time.toISOString() : event.end_time
   ) : null;
   
   // Для совместимости с клиентским кодом
-  const assignments = lesson.assignments || [];
+  const assignments = event.assignments || [];
   
   return {
-    id: lesson.id.toString(),
-    title: lesson.title,
+    id: event.id.toString(),
+    title: event.title,
     start: start,
     end: end,
-    categoryId: lesson.category_id ? lesson.category_id.toString() : '',
-    location: lesson.location || '',
-    description: lesson.description || '',
+    categoryId: event.category_id ? event.category_id.toString() : '',
+    location: event.location || '',
+    description: event.description || '',
     assignments: Array.isArray(assignments) 
       ? assignments.map(id => id.toString()) 
       : []
   };
 };
 
-// Обновление урока
+// Обновление события
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      console.log('PUT /api/lessons/[id] - id:', params.id);
+      console.log('PUT /api/events/[id] - id:', params.id);
       
-      const lessonId = parseInt(params.id);
+      const eventId = parseInt(params.id);
       const body = await req.json();
       console.log('Тело запроса:', body);
       
@@ -81,9 +81,9 @@ export async function PUT(
         );
       }
       
-      // Обновление урока
-      const lesson = await eventRepository.updateEvent(
-        lessonId,
+      // Обновление события
+      const event = await eventRepository.updateEvent(
+        eventId,
         title,
         startDate,
         endDate,
@@ -92,21 +92,21 @@ export async function PUT(
         description
       );
       
-      if (!lesson) {
+      if (!event) {
         return NextResponse.json(
-          { error: 'Урок не найден' },
+          { error: 'Событие не найдено' },
           { status: 404 }
         );
       }
       
-      console.log('Обновлен урок:', lesson);
+      console.log('Обновлено событие:', event);
       
       // Преобразуем форматы для клиентского кода
-      const formattedLesson = formatLesson(lesson);
+      const formattedEvent = formatEvent(event);
       
-      return NextResponse.json(formattedLesson);
+      return NextResponse.json(formattedEvent);
     } catch (error) {
-      console.error('Ошибка при обновлении урока:', error);
+      console.error('Ошибка при обновлении события:', error);
       return NextResponse.json(
         { error: 'Внутренняя ошибка сервера' },
         { status: 500 }
@@ -115,25 +115,25 @@ export async function PUT(
   });
 }
 
-// Удаление урока
+// Удаление события
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      console.log('DELETE /api/lessons/[id] - id:', params.id);
+      console.log('DELETE /api/events/[id] - id:', params.id);
       
-      const lessonId = parseInt(params.id);
+      const eventId = parseInt(params.id);
       
-      // Удаление урока
-      await eventRepository.deleteEvent(lessonId);
+      // Удаление события
+      await eventRepository.deleteEvent(eventId);
       
-      console.log('Урок удален успешно');
+      console.log('Событие удалено успешно');
       
       return NextResponse.json({ success: true });
     } catch (error) {
-      console.error('Ошибка при удалении урока:', error);
+      console.error('Ошибка при удалении события:', error);
       return NextResponse.json(
         { error: 'Внутренняя ошибка сервера' },
         { status: 500 }

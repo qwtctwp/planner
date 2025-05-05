@@ -51,7 +51,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       <Box component="form" onSubmit={handleSubmit}>
         <TextField
           label="Электронная почта"
-          type="email"
+          type="text"
           fullWidth
           margin="normal"
           required

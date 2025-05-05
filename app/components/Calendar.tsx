@@ -10,6 +10,11 @@ import ruLocale from '@fullcalendar/core/locales/ru';
 import EventContextMenu from './EventContextMenu';
 import ConfirmationDialog from './ConfirmationDialog';
 import '../fullcalendar.css';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon
+} from '@mui/icons-material';
 
 interface CalendarEvent {
   id: string;

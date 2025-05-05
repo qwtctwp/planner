@@ -8,39 +8,35 @@ const formatTopic = (topic: any) => {
   return {
     ...topic,
     id: topic.id.toString(),
-    categoryId: topic.category_id ? topic.category_id.toString() : null,
+    categoryId: topic.category_id ? topic.category_id.toString() : '',
+    cardsCount: topic.cards_count || 0,
     createdAt: topic.created_at ? topic.created_at.toISOString() : new Date().toISOString(),
-    cardsCount: topic.cards_count || 0
+    color: topic.color || '#84A7C4' // Дефолтный цвет
   };
 };
 
-// Получение тем для флеш-карточек
+// Получение всех тем для пользователя
 export async function GET(request: NextRequest) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      console.log('GET /api/flashcard-topics');
+      const url = new URL(req.url);
+      const userId = url.searchParams.get('userId');
       
-      // Получаем userId из запроса или используем ID текущего пользователя
-      const { searchParams } = new URL(req.url);
-      const userId = searchParams.get('userId') || user.id;
+      if (!userId) {
+        return NextResponse.json(
+          { error: 'Не указан ID пользователя' },
+          { status: 400 }
+        );
+      }
       
-      console.log('ID пользователя для запроса тем:', userId);
+      const topics = await flashcardTopicRepository.getTopicsByUserId(parseInt(userId));
       
-      // Получение тем из базы данных
-      const topics = await flashcardTopicRepository.getTopicsByUserId(parseInt(userId as string));
-      
-      console.log('Найдено тем:', topics.length);
-      
-      // Преобразуем ID в строки для клиентского кода
+      // Форматируем темы для клиентского кода
       const formattedTopics = topics.map(formatTopic);
       
-      // Создаем ответ с правильной кодировкой
-      const response = NextResponse.json(formattedTopics);
-      response.headers.set('Content-Type', 'application/json; charset=utf-8');
-      
-      return response;
+      return NextResponse.json(formattedTopics);
     } catch (error) {
-      console.error('Ошибка при получении тем:', error);
+      console.error('Ошибка при получении тем флеш-карточек:', error);
       return NextResponse.json(
         { error: 'Внутренняя ошибка сервера' },
         { status: 500 }
@@ -49,27 +45,14 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// Создание новой темы
+// Добавление новой темы
 export async function POST(request: NextRequest) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      // Получаем тело запроса в сыром виде
-      const rawBody = await req.text();
-      console.log('Raw request body:', rawBody);
-
-      // Преобразуем тело запроса в JSON
-      const body = JSON.parse(rawBody);
-      console.log('POST /api/flashcard-topics - тело запроса:', body);
+      const body = await req.json();
+      const { title, description, categoryId, color, userId } = body;
       
-      const { 
-        title, 
-        description = '', 
-        categoryId,
-        color,
-        userId
-      } = body;
-      
-      // Проверка обязательных полей
+      // Валидация входных данных
       if (!title) {
         return NextResponse.json(
           { error: 'Необходимо указать название темы' },
@@ -77,36 +60,28 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      const userIdForTopic = parseInt(userId || user.id);
-      console.log('ID пользователя для темы:', userIdForTopic);
-      
-      // Преобразуем categoryId в number или null
-      let categoryIdNumber = null;
-      if (categoryId && categoryId.trim() !== '') {
-        categoryIdNumber = parseInt(categoryId);
+      if (!userId) {
+        return NextResponse.json(
+          { error: 'Не указан ID пользователя' },
+          { status: 400 }
+        );
       }
       
-      // Создание темы
+      // Создаем новую тему
       const topic = await flashcardTopicRepository.createTopic(
         title,
-        userIdForTopic,
-        categoryIdNumber,
-        description,
-        color
+        parseInt(userId),
+        categoryId ? parseInt(categoryId) : null,
+        description || null,
+        color || null
       );
       
-      console.log('Создана тема:', topic);
-      
-      // Преобразуем ID в строку для клиентского кода
+      // Форматируем тему для клиентского кода
       const formattedTopic = formatTopic(topic);
       
-      // Создаем ответ с правильной кодировкой
-      const response = NextResponse.json(formattedTopic);
-      response.headers.set('Content-Type', 'application/json; charset=utf-8');
-      
-      return response;
+      return NextResponse.json(formattedTopic);
     } catch (error) {
-      console.error('Ошибка при создании темы:', error);
+      console.error('Ошибка при создании темы флеш-карточек:', error);
       return NextResponse.json(
         { error: 'Внутренняя ошибка сервера' },
         { status: 500 }

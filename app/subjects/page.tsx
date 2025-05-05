@@ -64,19 +64,18 @@ import {
 } from '@mui/icons-material';
 import SideBar from '../components/SideBar';
 import { useAuth } from '../contexts/AuthContext';
-import { getCategoriesForUser } from '../lib/api';
 import { 
-  addTopic,
-  updateTopic,
-  deleteTopic,
-  getTopicsForUser,
-  getCardsForTopic,
-  getCardsForUser,
-  addCard,
-  updateCard,
-  deleteCard,
-  toggleCardFavorite
-} from '../lib/flashcardApi';
+  getCategoriesForUser,
+  getFlashcardTopicsForUser,
+  getFlashcardsForUser,
+  addFlashcardTopic,
+  updateFlashcardTopic,
+  deleteFlashcardTopic,
+  addFlashcard,
+  updateFlashcard,
+  toggleFlashcardFavorite,
+  deleteFlashcard
+} from '../lib/api';
 import { Category, Flashcard, FlashcardTopic } from '../types';
 
 // Заменяю sampleTopics и sampleFlashcards на пустые массивы
@@ -145,20 +144,22 @@ export default function FlashcardsPage() {
     if (user) {
       const loadData = async () => {
         try {
-          // Загружаем категории
+          setLoading(true);
+          
+          // Load categories
           const userCategories = await getCategoriesForUser(user.id);
           
           // Фильтруем только категории с типом 'subject'
           const subjectCategories = userCategories.filter(cat => cat.type === 'subject');
           setCategories(subjectCategories);
           
-          // Загружаем темы для флеш-карточек
-          const userTopics = await getTopicsForUser(user.id);
+          // Load flashcard topics
+          const userTopics = await getFlashcardTopicsForUser(user.id);
           setTopics(userTopics);
           
-          // Загружаем все карточки пользователя
-          const userCards = await getCardsForUser(user.id);
-          setFlashcards(userCards);
+          // Load flashcards
+          const userFlashcards = await getFlashcardsForUser(user.id);
+          setFlashcards(userFlashcards);
           
           setLoading(false);
         } catch (error) {
@@ -190,19 +191,23 @@ export default function FlashcardsPage() {
       const card = flashcards.find(c => c.id === id);
       if (!card) return;
       
-      const newFavoriteStatus = !card.favorite;
-      
-      // Обновляем на сервере
-      await toggleCardFavorite(id, newFavoriteStatus);
-      
-      // Обновляем в UI
+      // Оптимистическое обновление UI
       setFlashcards(prev => 
         prev.map(card => 
-          card.id === id ? {...card, favorite: newFavoriteStatus} : card
+          card.id === id ? {...card, favorite: !card.favorite} : card
         )
       );
+      
+      // Вызов API для сохранения изменений
+      await toggleFlashcardFavorite(id, !card.favorite);
     } catch (error) {
-      console.error('Ошибка при обновлении статуса избранного:', error);
+      console.error('Ошибка при обновлении избранного:', error);
+      // Откат изменений в случае ошибки
+      setFlashcards(prev => 
+        prev.map(card => 
+          card.id === id ? {...card, favorite: card.favorite} : card
+        )
+      );
     }
   };
 
@@ -345,82 +350,83 @@ export default function FlashcardsPage() {
   const handleConfirmDelete = async () => {
     try {
       if (deleteType === 'topic' && topicToDelete) {
-        await deleteTopic(topicToDelete.id);
+        // Вызываем API для удаления темы
+        await deleteFlashcardTopic(topicToDelete.id);
         
-        // Удаляем тему из списка
+        // Обновляем локальное состояние
         setTopics(prev => prev.filter(t => t.id !== topicToDelete.id));
+        setFlashcards(prev => prev.filter(c => c.topicId !== topicToDelete.id));
         
-        // Если выбрана удаляемая тема, сбрасываем выбор
+        // If we're viewing cards of the deleted topic, go back to topics
         if (selectedTopic && selectedTopic.id === topicToDelete.id) {
           setSelectedTopic(null);
           setViewMode('topics');
         }
-        
-        // Удаляем все карточки этой темы
-        setFlashcards(prev => prev.filter(c => c.topicId !== topicToDelete.id));
       } else if (deleteType === 'card' && cardToDelete) {
-        await deleteCard(cardToDelete.id);
+        // Вызываем API для удаления карточки
+        await deleteFlashcard(cardToDelete.id);
         
-        // Удаляем карточку из списка
+        // Обновляем локальное состояние
         setFlashcards(prev => prev.filter(c => c.id !== cardToDelete.id));
         
-        // Обновляем счетчик карточек в теме
-        const updatedTopic = topics.find(t => t.id === cardToDelete.topicId);
-        if (updatedTopic) {
-          const updatedTopicWithCount = {
-            ...updatedTopic,
-            cardsCount: Math.max((updatedTopic.cardsCount || 0) - 1, 0)
-          };
-          
+        // Update card count in the topic
+        if (cardToDelete.topicId) {
           setTopics(prev => 
-            prev.map(t => t.id === cardToDelete.topicId ? updatedTopicWithCount : t)
+            prev.map(topic => 
+              topic.id === cardToDelete.topicId 
+                ? { ...topic, cardsCount: topic.cardsCount - 1 } 
+                : topic
+            )
           );
-          
-          // Обновляем выбранную тему, если это она
-          if (selectedTopic && selectedTopic.id === cardToDelete.topicId) {
-            setSelectedTopic(updatedTopicWithCount);
-          }
         }
       }
     } catch (error) {
       console.error('Ошибка при удалении:', error);
-      // Можно добавить показ уведомления об ошибке
+    } finally {
+      setDeleteDialogOpen(false);
+      setTopicToDelete(null);
+      setCardToDelete(null);
+      setDeleteType('');
     }
-    
-    setDeleteDialogOpen(false);
-    setTopicToDelete(null);
-    setCardToDelete(null);
-    setDeleteType('');
   };
   
   // Add/Edit Topic handler
   const handleAddOrUpdateTopic = async () => {
-    if (!newTopicData.title) return;
-    
-    // Если categoryId не указан, берем первую категорию или используем дефолт
-    let effectiveCategoryId = newTopicData.categoryId;
-    let effectiveColor = '#84A7C4'; // дефолтный цвет
-    
-    if (!effectiveCategoryId && categories.length > 0) {
-      effectiveCategoryId = categories[0].id;
-      effectiveColor = categories[0].color;
-    }
-    
-    const category = categories.find(c => c.id === effectiveCategoryId);
-    if (category) {
-      effectiveColor = category.color;
-    }
+    if (!newTopicData.title || !user) return;
     
     try {
+      // Если categoryId не указан, берем первую категорию или используем дефолт
+      let effectiveCategoryId = newTopicData.categoryId;
+      let effectiveColor = '#84A7C4'; // дефолтный цвет
+      
+      if (!effectiveCategoryId && categories.length > 0) {
+        effectiveCategoryId = categories[0].id;
+        effectiveColor = categories[0].color;
+      }
+      
+      const category = categories.find(c => c.id === effectiveCategoryId);
+      if (category) {
+        effectiveColor = category.color;
+      }
+      
       if (editMode && editingTopic) {
         // Update existing topic
-        const updatedTopic = await updateTopic(editingTopic.id, {
+        await updateFlashcardTopic(editingTopic.id, {
           title: newTopicData.title,
           description: newTopicData.description,
           categoryId: effectiveCategoryId,
-          color: effectiveColor
+          color: effectiveColor,
         });
         
+        const updatedTopic: FlashcardTopic = {
+          ...editingTopic,
+          title: newTopicData.title,
+          description: newTopicData.description,
+          categoryId: effectiveCategoryId,
+          color: effectiveColor,
+        };
+        
+        // Обновляем локальное состояние
         setTopics(prev => prev.map(t => t.id === editingTopic.id ? updatedTopic : t));
         
         // Update the selected topic if it's the one being edited
@@ -429,77 +435,109 @@ export default function FlashcardsPage() {
         }
       } else {
         // Add new topic
-        const topicData = {
+        const topicId = await addFlashcardTopic(user.id, {
           title: newTopicData.title,
           description: newTopicData.description,
           categoryId: effectiveCategoryId,
-          color: effectiveColor
+          color: effectiveColor,
+        });
+        
+        const newTopic: FlashcardTopic = {
+          id: topicId,
+          title: newTopicData.title,
+          description: newTopicData.description,
+          categoryId: effectiveCategoryId,
+          color: effectiveColor,
+          createdAt: new Date().toISOString(),
+          cardsCount: 0
         };
         
-        const newTopic = await addTopic(user?.id, topicData);
-        
+        // Обновляем локальное состояние
         setTopics(prev => [...prev, newTopic]);
       }
     } catch (error) {
       console.error('Ошибка при сохранении темы:', error);
-      // Можно добавить показ уведомления об ошибке
+    } finally {
+      handleCloseTopicDialog();
     }
-    
-    handleCloseTopicDialog();
   };
   
   // Add/Edit Card handler
   const handleAddOrUpdateCard = async () => {
-    if (!newCardData.front || !newCardData.back || !newCardData.topicId) return;
+    if (!newCardData.front || !newCardData.back || !newCardData.topicId || !user) return;
     
     try {
       if (editMode && editingCard) {
         // Update existing card
-        const updatedCard = await updateCard(editingCard.id, {
+        await updateFlashcard(editingCard.id, {
           front: newCardData.front,
           back: newCardData.back,
-          favorite: editingCard.favorite
+          topicId: newCardData.topicId,
+          categoryId: newCardData.categoryId,
         });
         
+        const updatedCard: Flashcard = {
+          ...editingCard,
+          front: newCardData.front,
+          back: newCardData.back,
+          topicId: newCardData.topicId,
+          categoryId: newCardData.categoryId,
+        };
+        
+        // Обновляем локальное состояние
         setFlashcards(prev => prev.map(c => c.id === editingCard.id ? updatedCard : c));
+        
+        // If moving to different topic, update counts
+        if (editingCard.topicId !== newCardData.topicId) {
+          setTopics(prev => 
+            prev.map(topic => {
+              if (topic.id === editingCard.topicId) {
+                return { ...topic, cardsCount: topic.cardsCount - 1 };
+              }
+              if (topic.id === newCardData.topicId) {
+                return { ...topic, cardsCount: topic.cardsCount + 1 };
+              }
+              return topic;
+            })
+          );
+        }
       } else {
         // Add new card
-        const cardData = {
+        const cardId = await addFlashcard(user.id, {
           front: newCardData.front,
           back: newCardData.back,
           topicId: newCardData.topicId,
           categoryId: newCardData.categoryId,
           favorite: false
+        });
+        
+        const newCard: Flashcard = {
+          id: cardId,
+          front: newCardData.front,
+          back: newCardData.back,
+          topicId: newCardData.topicId,
+          categoryId: newCardData.categoryId,
+          favorite: false,
+          createdAt: new Date().toISOString()
         };
         
-        const newCard = await addCard(user?.id, cardData);
-        
+        // Обновляем локальное состояние
         setFlashcards(prev => [...prev, newCard]);
         
-        // Обновляем счетчик карточек в теме
-        const updatedTopic = topics.find(t => t.id === newCardData.topicId);
-        if (updatedTopic) {
-          const updatedTopicWithCount = {
-            ...updatedTopic,
-            cardsCount: (updatedTopic.cardsCount || 0) + 1
-          };
-          
-          setTopics(prev => 
-            prev.map(t => t.id === newCardData.topicId ? updatedTopicWithCount : t)
-          );
-          
-          // Обновляем выбранную тему, если это она
-          if (selectedTopic && selectedTopic.id === newCardData.topicId) {
-            setSelectedTopic(updatedTopicWithCount);
-          }
-        }
+        // Update card count in the topic
+        setTopics(prev => 
+          prev.map(topic => 
+            topic.id === newCardData.topicId 
+              ? { ...topic, cardsCount: topic.cardsCount + 1 } 
+              : topic
+          )
+        );
       }
     } catch (error) {
       console.error('Ошибка при сохранении карточки:', error);
-      // Можно добавить показ уведомления об ошибке
+    } finally {
+      handleCloseCardDialog();
     }
-    
-    handleCloseCardDialog();
   };
 
   // Filter topics by category

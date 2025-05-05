@@ -3,52 +3,47 @@ import { withAuth } from '../../lib/auth';
 import { flashcardRepository } from '../../lib/db';
 
 // Преобразование числовых ID в строки для клиентского кода
-const formatCard = (card: any) => {
+const formatFlashcard = (card: any) => {
   if (!card) return null;
   return {
     ...card,
     id: card.id.toString(),
     topicId: card.topic_id ? card.topic_id.toString() : '',
     categoryId: card.category_id ? card.category_id.toString() : '',
-    createdAt: card.created_at ? card.created_at.toISOString() : new Date().toISOString(),
-    favorite: !!card.favorite
+    favorite: !!card.favorite,
+    createdAt: card.created_at ? card.created_at.toISOString() : new Date().toISOString()
   };
 };
 
-// Получение карточек (по пользователю или по теме)
+// Получение карточек по пользователю или теме
 export async function GET(request: NextRequest) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      console.log('GET /api/flashcards');
-      
-      // Получаем параметры из запроса
-      const { searchParams } = new URL(req.url);
-      const userId = searchParams.get('userId') || user.id;
-      const topicId = searchParams.get('topicId');
-      
-      console.log('Параметры запроса:', { userId, topicId });
+      const url = new URL(req.url);
+      const userId = url.searchParams.get('userId');
+      const topicId = url.searchParams.get('topicId');
       
       let cards;
       
-      // Получение карточек по теме или по пользователю
       if (topicId) {
+        // Получение карточек по теме
         cards = await flashcardRepository.getCardsByTopicId(parseInt(topicId));
-        console.log(`Найдено ${cards.length} карточек для темы ${topicId}`);
+      } else if (userId) {
+        // Получение карточек по пользователю
+        cards = await flashcardRepository.getCardsByUserId(parseInt(userId));
       } else {
-        cards = await flashcardRepository.getCardsByUserId(parseInt(userId as string));
-        console.log(`Найдено ${cards.length} карточек для пользователя ${userId}`);
+        return NextResponse.json(
+          { error: 'Необходимо указать userId или topicId' },
+          { status: 400 }
+        );
       }
       
-      // Преобразуем ID в строки для клиентского кода
-      const formattedCards = cards.map(formatCard);
+      // Форматируем карточки для клиентского кода
+      const formattedCards = cards.map(formatFlashcard);
       
-      // Создаем ответ с правильной кодировкой
-      const response = NextResponse.json(formattedCards);
-      response.headers.set('Content-Type', 'application/json; charset=utf-8');
-      
-      return response;
+      return NextResponse.json(formattedCards);
     } catch (error) {
-      console.error('Ошибка при получении карточек:', error);
+      console.error('Ошибка при получении флеш-карточек:', error);
       return NextResponse.json(
         { error: 'Внутренняя ошибка сервера' },
         { status: 500 }
@@ -57,69 +52,51 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// Создание новой карточки
+// Добавление новой карточки
 export async function POST(request: NextRequest) {
   return withAuth(request, async (req: NextRequest, user: any) => {
     try {
-      // Получаем тело запроса в сыром виде
-      const rawBody = await req.text();
-      console.log('Raw request body:', rawBody);
-
-      // Преобразуем тело запроса в JSON
-      const body = JSON.parse(rawBody);
-      console.log('POST /api/flashcards - тело запроса:', body);
+      const body = await req.json();
+      const { front, back, topicId, categoryId, favorite, userId } = body;
       
-      const { 
-        front, 
-        back, 
-        topicId,
-        categoryId,
-        favorite = false,
-        userId
-      } = body;
-      
-      // Проверка обязательных полей
-      if (!front || !back || !topicId) {
+      // Валидация входных данных
+      if (!front || !back) {
         return NextResponse.json(
-          { error: 'Необходимо указать вопрос, ответ и тему карточки' },
+          { error: 'Необходимо указать содержимое карточки (front и back)' },
           { status: 400 }
         );
       }
       
-      const userIdForCard = parseInt(userId || user.id);
-      console.log('ID пользователя для карточки:', userIdForCard);
-      
-      // Преобразуем topicId и categoryId в number
-      const topicIdNumber = parseInt(topicId);
-      
-      // Преобразуем categoryId в number или null
-      let categoryIdNumber = null;
-      if (categoryId && categoryId.trim() !== '') {
-        categoryIdNumber = parseInt(categoryId);
+      if (!topicId) {
+        return NextResponse.json(
+          { error: 'Необходимо указать тему карточки (topicId)' },
+          { status: 400 }
+        );
       }
       
-      // Создание карточки
+      if (!userId) {
+        return NextResponse.json(
+          { error: 'Не указан ID пользователя' },
+          { status: 400 }
+        );
+      }
+      
+      // Создаем новую карточку
       const card = await flashcardRepository.createCard(
         front,
         back,
-        topicIdNumber,
-        userIdForCard,
-        categoryIdNumber,
-        !!favorite
+        parseInt(topicId),
+        parseInt(userId),
+        categoryId ? parseInt(categoryId) : null,
+        favorite === true
       );
       
-      console.log('Создана карточка:', card);
+      // Форматируем карточку для клиентского кода
+      const formattedCard = formatFlashcard(card);
       
-      // Преобразуем ID в строку для клиентского кода
-      const formattedCard = formatCard(card);
-      
-      // Создаем ответ с правильной кодировкой
-      const response = NextResponse.json(formattedCard);
-      response.headers.set('Content-Type', 'application/json; charset=utf-8');
-      
-      return response;
+      return NextResponse.json(formattedCard);
     } catch (error) {
-      console.error('Ошибка при создании карточки:', error);
+      console.error('Ошибка при создании флеш-карточки:', error);
       return NextResponse.json(
         { error: 'Внутренняя ошибка сервера' },
         { status: 500 }

@@ -36,6 +36,7 @@ interface AssignmentDialogProps {
   categories: Category[];
   lessons: Lesson[];
   initialData?: Assignment;
+  initialLesson?: Lesson | null;
 }
 
 const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
@@ -44,24 +45,40 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
   onSave,
   categories,
   lessons,
-  initialData
+  initialData,
+  initialLesson
 }) => {
   const [lessonId, setLessonId] = useState<string>('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date>(new Date());
   
-  // Initialize form with initial data if provided
+  // Initial form setup
   useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title);
-      setDescription(initialData.description || '');
-      setDueDate(new Date(initialData.dueDate));
-      setLessonId(initialData.lessonId || '');
-    } else {
-      resetForm();
+    // Reset form when dialog opens
+    if (open) {
+      if (initialData) {
+        // If editing existing assignment
+        setTitle(initialData.title);
+        setDescription(initialData.description || '');
+        setDueDate(new Date(initialData.dueDate));
+        setLessonId(initialData.lessonId || '');
+      } else if (initialLesson) {
+        // If creating new assignment from a lesson
+        setLessonId(String(initialLesson.id));
+        setTitle(initialLesson.title);
+        
+        // Set due date to next day after lesson
+        const nextDay = new Date(initialLesson.end);
+        nextDay.setDate(nextDay.getDate() + 1);
+        nextDay.setHours(23, 59, 0, 0);
+        setDueDate(nextDay);
+      } else {
+        // If creating brand new assignment
+        resetForm();
+      }
     }
-  }, [initialData, open]);
+  }, [initialData, initialLesson, open]);
   
   // Автоматическое обновление названия и срока сдачи при выборе урока
   useEffect(() => {
@@ -86,7 +103,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
       title,
       description,
       dueDate: dueDate.toISOString(),
-      lessonId: lessonId || null
+      lessonId: lessonId || undefined
     });
     resetForm();
     onClose();
